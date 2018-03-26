@@ -1,0 +1,4 @@
+http://www.climatewna.com/rasters/climateBC/bec/BEC_zone_2010s.zip
+http://www.climatewna.com/rasters/climateBC/bec/BEC_zone_2020s.zip
+http://www.climatewna.com/rasters/climateBC/bec/BEC_zone_2050s.zip
+http://www.climatewna.com/rasters/climateBC/bec/BEC_zone_2080s.zip
