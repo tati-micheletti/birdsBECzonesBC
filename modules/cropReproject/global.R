@@ -25,9 +25,9 @@ objects = list(rasterMap = c(file.path(getwd(),"data","can_age04_1km.tif"),file.
                areaName = "British Columbia", 
                croppedRasterName = c(file.path(paths$outputPath,"ageMap"), file.path(paths$outputPath,"vegMap")))
 
-dev.useRSGD(FALSE) # do not use Rstudio graphics device
-dev() # opens external (non-RStudio) device, which is faster
-clearPlot()
+# dev.useRSGD(FALSE) # do not use Rstudio graphics device
+# dev() # opens external (non-RStudio) device, which is faster
+# clearPlot()
 
 ## Simulation setup
 mySim <- simInit(times = times, params = parameters, modules = modules, paths =  paths, objects = objects)
