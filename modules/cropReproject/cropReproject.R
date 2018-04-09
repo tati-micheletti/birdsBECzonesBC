@@ -91,7 +91,7 @@ doEvent.cropReproject = function(sim, eventTime, eventType) {
                        sim$croppedRaster <- Cache(cropRaster, sim = sim, filePathTemplate = sim$filePathTemplate, 
                                                        rasterMap = sim$rasterMap, useGdal = sim$useGdal, 
                                                        croppedRasterName =sim$croppedRasterName, cropFormat = sim$cropFormat),
-                       sim$croppedRaster <- Cache(cropArea, areaName = sim$areaName, sim = sim, filePathTemplate = sim$filePathTemplate, 
+                       sim$croppedRaster <- Cache(cropArea, sim = sim, areaName = sim$areaName, filePathTemplate = sim$filePathTemplate, 
                                                      rasterMap = sim$rasterMap, useGdal = sim$useGdal, 
                                                      croppedRasterName =sim$croppedRasterName, cropFormat = sim$cropFormat,
                                                   funcRast = sim$funcRast)))
