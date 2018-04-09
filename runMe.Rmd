@@ -3,28 +3,40 @@ title: "Bird abundances for BC with Climate Change"
 author: "Tati Micheletti"
 date: "4/4/2018"
 output: html_document
+header-includes:
+  - \usepackage{color}
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
+## About the project
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+The present project focused on predicting bird abundance (or density?) in BC considering predicted BEC zone changes with climate change. The models used for this are boosted regression trees (BRT, package `dismo`) that consider the following predicting variables for abundance (or density?):
+\textcolor{blue}{1. BEC_ZONE_CODE}: BEC Zone code as in [here](https://www.for.gov.bc.ca/hre/becweb/resources/classificationreports/subzones/index.html?)
+\textcolor{blue}{2. SPECIES_A}: Percentage of species A (converted to LCC10 classes)
+\textcolor{blue}{3. SPECIES_B}: Second dominant species percentage (converted to LCC10 classes)
+\textcolor{blue}{4. PROJ_AGE_1}: projected age of the stand (part of the forest succession module)
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+### Questions to answer:
+1. How compatible is the VRI information and the LCC10 map?
+2. There are 2 products available for doing the forest succession: LCC10 snapshot with LCC05 succession module [page](http://www.cec.org/tools-and-resources/map-files/land-cover-2010-modis-250m), which is too simple and might not give us differences, and [file](http://www.cec.org/sites/default/files/Atlas/Files/Land_Cover_2010/Land_Cover_2010_TIFF.zip) and the LANDIS Biomass Succession model for R, which is not yet completely climate sensitive.
 
-```{r cars}
-summary(cars)
+## Coding
+
+### Install and load libraries
+
+Install package that has BC shapefiles:
+```{r bcmaps}
+library(data.table)
+require("bcmaps")
+# install.packages('bcmaps.rdata', repos='https://bcgov.github.io/drat/') only if this has not been installed yet
+library(SpaDES)
 ```
 
-## Including Plots
+### SpaDES setup
 
-You can also embed plots, for example:
 
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
