@@ -10,46 +10,49 @@ cropArea <- function(areaName = sim$areaName, sim = sim, filePathTemplate = sim$
   require(rgdal)
   require(sf)
 
+  browser()
+  
   nRasters <- length(rasterMap)
   
   for (i in 1:nRasters){
-    rasterMap <- raster(rasterMap[i])
+    rasterMapEach <- raster(rasterMap[i])
     croppedRasterNameEach <- croppedRasterName[i]
 
 CAN_adm1 <- raster::getData("GADM", country="CAN", level=1, 
                                   path = dirname(filePathTemplate))
 
 lsfiles <- file.info(dir(dirname(filePathTemplate)))
-filePathTemplate <- rownames(lsfiles[order(lsfiles$mtime),][1])
+fileTemplateName <- rownames(lsfiles[order(lsfiles$mtime),][1])
+filePathTemplate <- file.path(inputPath(sim), fileTemplateName)
 
     shapefile <- readRDS(filePathTemplate) %>%
      CAN_adm1[CAN_adm1$NAME_1 == areaName,]
     
-    if (!(sp::proj4string(shapefile)==as.character(raster::crs(rasterMap)))){
-  shapefile <- sp::spTransform(x = shapefile, CRS = raster::crs(rasterMap))}
+    if (!(sp::proj4string(shapefile)==as.character(raster::crs(rasterMapEach)))){
+  shapefile <- sp::spTransform(x = shapefile, CRS = raster::crs(rasterMapEach))}
     
     ifelse(useGdal==TRUE,{
       
-      tryCatch(rasterMap[] <- rasterMap[])
+      tryCatch(rasterMapEach[] <- rasterMapEach[])
       shapefile <- as(shapefile, "SpatialPolygonsDataFrame")
       rgdal::writeOGR(obj = shapefile, dsn = ".", layer = file.path(outputPath(sim), "reprojectedShapefile"), driver="ESRI Shapefile")
       cutlinePath <- file.path(outputPath(sim), "reprojectedShapefile.shp")
       
-      gdalwarp(srcfile = sim$rasterMap, # Raster file path
+      gdalwarp(srcfile = sim$rasterMapEach, # Raster file path
              dstfile = croppedRasterNameEach, # Cropped raster file name
              overwrite=TRUE, # If you alreday have a raster with the same name and want to overwrite it
              cutline = cutlinePath, # Shapefile path to use for masking
              dstalpha = TRUE, # Creates an output alpha band to identify nodata (unset/transparent) pixels
-             s_srs= as.character(crs(rasterMap)), #Projection from the source raster file
-             t_srs= as.character(crs(rasterMap)), # Projection for the cropped file, it is possible to change projection here
+             s_srs= as.character(crs(rasterMapEach)), #Projection from the source raster file
+             t_srs= as.character(crs(rasterMapEach)), # Projection for the cropped file, it is possible to change projection here
              multi=TRUE, # Use multithreaded warping implementation.
              of=cropFormat, # Select the output format
              crop_to_cutline = TRUE, # Crop the raster to the shapefile
-             tr=res(rasterMap)) # Raster resolution, not sure it needs to be the same from original raster
+             tr=res(rasterMapEach)) # Raster resolution, not sure it needs to be the same from original raster
 
   },{
-    shapefile <- sp::spTransform(x = shapefile, CRS = sp::CRS(rasterMap))
-    eval(parse(text = paste0("raster::",funcRast,"(rasterMap, shapefile, filename=croppedRasterNameEach)")))
+    shapefile <- sp::spTransform(x = shapefile, CRS = sp::CRS(rasterMapEach))
+    eval(parse(text = paste0("raster::",funcRast,"(rasterMapEach, shapefile, filename=croppedRasterNameEach)")))
   })
   
 } # End for loop
@@ -58,8 +61,6 @@ filePathTemplate <- rownames(lsfiles[order(lsfiles$mtime),][1])
     obj <- raster(dstFile)
     return(obj)
   })
-  
-  browser()
   
   tryCatch(newRasterMap[] <- newRasterMap[]) # Bring the raster to memory (if possible)
   
