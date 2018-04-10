@@ -23,7 +23,7 @@ parameters <- list(useGdal = TRUE)
 objects = list(rasterMap = c(file.path(getwd(),"data","can_age04_1km.tif"),file.path(getwd(),"data","LCC2005_V1_4a.tif")),
                areaLimits = "defined", 
                areaName = "British Columbia", 
-               croppedRasterName = c(file.path(paths$outputPath,"ageMap"), file.path(paths$outputPath,"vegMap")))
+               croppedRasterName = c(file.path(paths$outputPath,"ageMap.tif"), file.path(paths$outputPath,"vegMap.tif")))
 
 # dev.useRSGD(FALSE) # do not use Rstudio graphics device
 # dev() # opens external (non-RStudio) device, which is faster
@@ -31,5 +31,6 @@ objects = list(rasterMap = c(file.path(getwd(),"data","can_age04_1km.tif"),file.
 
 ## Simulation setup
 mySim <- simInit(times = times, params = parameters, modules = modules, paths =  paths, objects = objects)
-system.time(mySimOut <- spades(mySim, debug = TRUE))
+system.time(mySimOut <- spades(mySim, debug = FALSE))
+
 

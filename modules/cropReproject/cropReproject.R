@@ -20,7 +20,7 @@ defineModule(sim, list(
   timeunit = "year",
   citation = list("citation.bib"),
   documentation = list("README.txt", "cropReproject.Rmd"),
-  reqdPkgs = list("SpaDES","quickPlot","sp","raster","sf","rgdal","tools","reproducible","gdalUtils","rgeos","sf"),
+  reqdPkgs = list("SpaDES","quickPlot","sp","raster","sf","rgdal","tools","reproducible","gdalUtils","rgeos","sf", "stringr"),
   parameters = rbind(
     defineParameter(".plotInitialTime", "numeric", 1, NA, NA, "This describes the simulation time at which the first plot event should occur"),
     defineParameter(".plotInterval", "numeric", NA, NA, NA, "This describes the simulation time interval between plot events"),
@@ -48,10 +48,11 @@ defineModule(sim, list(
                  sourceURL = rep(NA, times = 10))
   ),
   outputObjects = bind_rows(
-    createsOutput(objectName = c("rasterMap","croppedRaster"),
-                  objectClass = c("rasterLayer","rasterLayer"),
+    createsOutput(objectName = c("rasterMap","croppedRaster", "reprojectedShapefile"),
+                  objectClass = c("rasterLayer","rasterLayer", "SpatialPolygonsDataFrame"),
                   desc = c("Raster input which might be a module output if not provided",
-                           "Raster object/layer/map cropped to your cropPolygon"))
+                           "Raster object/layer/map cropped to your cropPolygon",
+                           "If crop is made from a shapefile, this is created in output folder"))
   )
 ))
 
@@ -70,11 +71,11 @@ doEvent.cropReproject = function(sim, eventTime, eventType) {
     },
     crop = {
 
-      if(is.null(sim$rasterMap)|!suppliedElsewhere(sim$rasterMap)){
+      if(is.null(sim$rasterMap)|!suppliedElsewhere(sim$rasterMap)){ # FIX FOR MORE THAN ONE RASTER
         invisible(readline(prompt="No raster to crop was provided. A sample raster (LCC2010, 250m) will be downloaded. Press [enter] to continue."))
         sim$rasterMap <- downloadRaster(sim = sim)}
       
-      if(!is.null(sim$rasterMap)&!file.exists(sim$rasterMap)){
+      if(!is.null(sim$rasterMap)&!file.exists(sim$rasterMap)){ # FIX FOR MORE THAN ONE RASTER
         invisible(readline(prompt="No raster to crop was provided. A sample raster (LCC2010, 250m) will be downloaded. Press [enter] to continue."))
         sim$rasterMap <- downloadRaster(sim = sim)}
       
@@ -101,14 +102,21 @@ doEvent.cropReproject = function(sim, eventTime, eventType) {
         
         sim$croppedRaster <- Cache(cropRandomPolygon, polyMatrix = sim$polyMatrix, areaSize = sim$areaSize, 
                                                sim = sim, rasterMap = sim$rasterMap, useGdal = sim$useGdal, 
-                                               croppedRasterName =sim$croppedRasterName, cropFormat = sim$cropFormat,
+                                               croppedRasterName = sim$croppedRasterName, cropFormat = sim$cropFormat,
                                                funcRast = sim$funcRast)
       }
-              
+      
+      sim$croppedRaster  <- Cache(checkProjections, ...) #FINISH FUNCTION
+
     },
     plot = {
-      
-      quickPlot::Plot(sim$croppedRaster, title = "Cropped Raster")
+      require(stringr)
+      namesRasters <- str_match(sim$croppedRasterName, "/outputs/(.*?).tif")
+      ifelse(is.list(sim$croppedRaster),
+         {names(sim$croppedRaster) <- namesRasters[,2]
+         title <- namesRasters[,2]},
+         title <- "Cropped Raster")
+      quickPlot::Plot(sim$croppedRaster, title = title)
     
     },
     save = {
