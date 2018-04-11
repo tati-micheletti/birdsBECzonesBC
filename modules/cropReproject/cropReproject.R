@@ -71,11 +71,11 @@ doEvent.cropReproject = function(sim, eventTime, eventType) {
     },
     crop = {
 
-      if(is.null(sim$rasterMap)|!suppliedElsewhere(sim$rasterMap)){ # FIX FOR MORE THAN ONE RASTER
+      if(all(is.null(sim$rasterMap)|!suppliedElsewhere(sim$rasterMap))){ # FIX FOR MORE THAN ONE RASTER
         invisible(readline(prompt="No raster to crop was provided. A sample raster (LCC2010, 250m) will be downloaded. Press [enter] to continue."))
         sim$rasterMap <- downloadRaster(sim = sim)}
       
-      if(!is.null(sim$rasterMap)&!file.exists(sim$rasterMap)){ # FIX FOR MORE THAN ONE RASTER
+      if(all(!is.null(sim$rasterMap)&!file.exists(sim$rasterMap))){ # FIX FOR MORE THAN ONE RASTER
         invisible(readline(prompt="No raster to crop was provided. A sample raster (LCC2010, 250m) will be downloaded. Press [enter] to continue."))
         sim$rasterMap <- downloadRaster(sim = sim)}
       
@@ -106,8 +106,6 @@ doEvent.cropReproject = function(sim, eventTime, eventType) {
                                                funcRast = sim$funcRast)
       }
       
-      sim$croppedRaster  <- Cache(checkProjections, ...) #FINISH FUNCTION
-
     },
     plot = {
       require(stringr)
@@ -121,7 +119,7 @@ doEvent.cropReproject = function(sim, eventTime, eventType) {
     },
     save = {
       
-      if(!file.exists(sim$croppedRasterName))
+      if(any(!file.exists(sim$croppedRasterName)))
       writeRaster(sim$croppedRaster, filename = file.path(ouputPath(sim),"croppedRaster"), format = sim$cropFormat)
     },
  

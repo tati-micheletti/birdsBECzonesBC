@@ -14,6 +14,8 @@ cropArea <- function(areaName = sim$areaName, sim = sim, filePathTemplate = sim$
   
   for (i in 1:nRasters){
     rasterMapEach <- raster(rasterMap[i])
+    rasterProj <- raster(rasterMap[1])
+    
     croppedRasterNameEach <- croppedRasterName[i]
 
     if(file.exists(croppedRasterNameEach)){next}
@@ -46,7 +48,7 @@ shapefile <- readRDS(filePathTemplate) %>%
              cutline = cutlinePath, # Shapefile path to use for masking
              dstalpha = TRUE, # Creates an output alpha band to identify nodata (unset/transparent) pixels
              s_srs= as.character(crs(rasterMapEach)), #Projection from the source raster file
-             t_srs= as.character(crs(rasterMapEach)), # Projection for the cropped file, it is possible to change projection here
+             t_srs= as.character(crs(rasterProj)), # Projection for the cropped file, it is possible to change projection here
              multi = TRUE, # Use multithreaded warping implementation.
              of = cropFormat, # Select the output format
              crop_to_cutline = TRUE, # Crop the raster to the shapefile
@@ -60,14 +62,10 @@ shapefile <- readRDS(filePathTemplate) %>%
   
 } # End for loop
 
-  # ENSURE ALL CROPPED RASTERS HAVE THE SAME PROJECTION: Pass an argument from the Global indicating which raster should be the leading projection?
-  
-  
-  
   newRasterMap <- lapply(X = croppedRasterName, FUN = function(dstFile){
     obj <- raster(dstFile)
     return(obj)
   })
 
-  return(invisible(newRasterMap))
+ return(invisible(newRasterMap))
 }
