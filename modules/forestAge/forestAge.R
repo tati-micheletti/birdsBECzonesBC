@@ -25,8 +25,8 @@ defineModule(sim, list(
     defineParameter(".saveInterval", "numeric", NA_real_, NA, NA, desc = "Interval between save events")
   ),
   inputObjects = data.frame(
-    objectName = c("ageMapInit", "ageMap"),
-    objectClass = c("RasterLayer", "RasterLayer"),
+    objectName = c("ageMap"),
+    objectClass = c("RasterLayer"),
     sourceURL = c(
       "ftp://ftp.daac.ornl.gov/data/nacp/NA_TreeAge//data/can_age04_1km.tif",
       NA_character_
@@ -43,10 +43,6 @@ doEvent.forestAge <- function(sim, eventTime, eventType, debug = FALSE) {
     eventType,
     init = {
     ### check for object dependencies:
-    ### (use `checkObject` or similar)
-
-    # do stuff for this event
-    sim <- forestAgeInit(sim)
 
     # schedule the next event
     sim <- scheduleEvent(sim, params(sim)$forestAge$startTime, "forestAge", "age")
@@ -86,20 +82,14 @@ doEvent.forestAge <- function(sim, eventTime, eventType, debug = FALSE) {
   return(invisible(sim))
 }
 
-forestAgeInit <- function(sim) {
-  sim$ageMap <- sim$ageMapInit
-  setColors(sim$ageMap, n = 201) <- colorRampPalette(c("LightGreen", "DarkGreen"))(50)
-
-  return(invisible(sim))
-}
-
 forestAgeAge <- function(sim) {
+  quickPlot::setColors(sim$ageMap, n = 201) <- colorRampPalette(c("LightGreen", "DarkGreen"))(50)
   sim$ageMap <- setValues(sim$ageMap, pmin(200, getValues(sim$ageMap) +
                                              params(sim)$forestAge$returnInterval))
   if (exists("Fires", envir = envir(sim))) {
     sim$ageMap[sim$Fires>0] <- 0
   }
-  setColors(sim$ageMap, n = 201) <- colorRampPalette(c("LightGreen", "darkgreen"))(50)
+  quickPlot::setColors(sim$ageMap, n = 201) <- colorRampPalette(c("LightGreen", "darkgreen"))(50)
 
   return(invisible(sim))
 }

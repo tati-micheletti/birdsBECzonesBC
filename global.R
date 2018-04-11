@@ -14,16 +14,17 @@ paths <- list(
 setPaths(modulePath = paths$modulePath, inputPath = paths$inputPath, outputPath = paths$outputPath, cachePath = paths$cachePath)
 
 ## list the modules to use
-modules <- list("cropReproject")
+modules <- list("cropReproject", "LccToBeaconsReclassify", "forestAge", "forestSuccessionBeacons", "fireSpreadLcc")
 
 ## Set simulation and module parameters
 
-times <- list(start = 1, end = 1, timeunit = "year")
+times <- list(start = 2005, end = 2010, timeunit = "year")
 parameters <- list(useGdal = TRUE)
 objects = list(rasterMap = c(file.path(getwd(),"data","LCC2005_V1_4a.tif"),file.path(getwd(),"data","can_age04_1km.tif")),
                areaLimits = "defined", 
                areaName = "British Columbia", 
-               croppedRasterName = c(file.path(paths$outputPath,"vegMap.tif"), file.path(paths$outputPath,"ageMap.tif")))
+               croppedRasterName = c(file.path(paths$outputPath,"vegMap.tif"), file.path(paths$outputPath,"ageMap.tif")),
+               .globals = list(.plotInitialTime = 1))
 
 # dev.useRSGD(FALSE) # do not use Rstudio graphics device
 # dev() # opens external (non-RStudio) device, which is faster

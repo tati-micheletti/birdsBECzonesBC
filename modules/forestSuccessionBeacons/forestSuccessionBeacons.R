@@ -45,7 +45,6 @@ doEvent.forestSuccessionBeacons <- function(sim, eventTime, eventType, debug = F
     eventType,
     init = {
     # do stuff for this event
-    sim <- forestSuccessionInit(sim)
     sim$forestCover <- list()
     sim$ageForest <- list()
     sim$forestCoverDF <- list()
@@ -53,7 +52,7 @@ doEvent.forestSuccessionBeacons <- function(sim, eventTime, eventType, debug = F
 
     # schedule the next event
     sim <- scheduleEvent(sim, params(sim)$forestSuccessionBeacons$startTime,
-                         "forestSuccessionBeacons", "succession")
+                         "forestSuccessionBeacons", "succession", eventPriority = 5)
     sim <- scheduleEvent(sim, params(sim)$forestSuccessionBeacons$.plotInitialTime,
                         "forestSuccessionBeacons", "plot")
     sim <- scheduleEvent(sim, params(sim)$forestSuccessionBeacons$.saveInitialTime,
@@ -124,17 +123,13 @@ doEvent.forestSuccessionBeacons <- function(sim, eventTime, eventType, debug = F
   return(invisible(sim))
 }
 
-forestSuccessionInit <- function(sim) {
-  sim$vegMap <- sim$vegMapBeacons
-  sim$trajMap <- sim$trajMapBeacons
-  return(invisible(sim))
-}
-
 forestSuccessionSuccession <- function(sim) {
   # assuming ageMap has zeros on it, this increases index to 1
-  ageMap.v <- round(getValues(sim$ageMap)) + 1
-  trajMap.v <- getValues(sim$trajMap)
-  sim$vegMap <- setValues(sim$vegMap, sim$trajObj[cbind(ageMap.v, trajMap.v)])
+  sim$vegMap <- sim$vegMapBeacons
+  sim$trajMap <- sim$trajMapBeacons
+  ageMap.v <- round(raster::getValues(sim$ageMap)) + 1
+  trajMap.v <- raster::getValues(sim$trajMap)
+  sim$vegMap <- raster::setValues(sim$vegMap, sim$trajObj[cbind(ageMap.v, trajMap.v)])
   return(invisible(sim))
 }
 

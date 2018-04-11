@@ -43,19 +43,21 @@ doEvent.fireSpreadLcc <- function(sim, eventTime, eventType, debug = FALSE) {
   if (eventType == "init") {
     ### check for object dependencies:
     ### (use `checkObject` or similar)
-    checkObject(sim, name = "vegMap")
-
+    
     # Clear global variable
     sim[[P(sim)$burnStatsName]] <- numeric()
-    #sim[[P(sim)$burnStatsName]] <- numeric()
-
-    # do stuff for this event
-    sim <- sim$fireSpreadLccInit(sim)
 
     # schedule the next event
+    sim <- scheduleEvent(sim, P(sim)$startTime, "fireSpreadLcc", "spread")
     sim <- scheduleEvent(sim, P(sim)$startTime, "fireSpreadLcc", "burn")
     sim <- scheduleEvent(sim, P(sim)$.saveInterval, "fireSpreadLcc", "save")
     sim <- scheduleEvent(sim, P(sim)$.plotInitialTime, "fireSpreadLcc", "plot.init")
+    
+  } else if (eventType == "spread") {
+    # do stuff for this event
+    sim <- fireSpread(sim)
+    # schedule the next events
+    
   } else if (eventType == "burn") {
     # do stuff for this event
     sim <- sim$fireSpreadLccBurn(sim)
@@ -112,7 +114,7 @@ doEvent.fireSpreadLcc <- function(sim, eventTime, eventType, debug = FALSE) {
   return(invisible(sim))
 }
 
-fireSpreadLccInit <- function(sim) {
+fireSpread <- function(sim) {
   ### create burn map that tracks fire locations over time
 
   sim$maxFiresCumul <- 7 # used in legend scale

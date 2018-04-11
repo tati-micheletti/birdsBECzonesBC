@@ -22,9 +22,9 @@ defineModule(sim, list(
   documentation = list("README.txt", "cropReproject.Rmd"),
   reqdPkgs = list("SpaDES","quickPlot","sp","raster","sf","rgdal","tools","reproducible","gdalUtils","rgeos","sf", "stringr"),
   parameters = rbind(
-    defineParameter(".plotInitialTime", "numeric", 1, NA, NA, "This describes the simulation time at which the first plot event should occur"),
+    defineParameter(".plotInitialTime", "numeric", 2005, NA, NA, "This describes the simulation time at which the first plot event should occur"),
     defineParameter(".plotInterval", "numeric", NA, NA, NA, "This describes the simulation time interval between plot events"),
-    defineParameter(".saveInitialTime", "numeric", 1, NA, NA, "This describes the simulation time at which the first save event should occur"),
+    defineParameter(".saveInitialTime", "numeric", 2005, NA, NA, "This describes the simulation time at which the first save event should occur"),
     defineParameter(".saveInterval", "numeric", NA, NA, NA, "This describes the simulation time interval between save events"),
     defineParameter(".useCache", "logical", FALSE, NA, NA, "Should this entire module be run with caching activated? This is generally intended for data-type modules, where stochasticity and time are not relevant")
   ),
@@ -48,11 +48,12 @@ defineModule(sim, list(
                  sourceURL = rep(NA, times = 10))
   ),
   outputObjects = bind_rows(
-    createsOutput(objectName = c("rasterMap","croppedRaster", "reprojectedShapefile"),
-                  objectClass = c("rasterLayer","rasterLayer", "SpatialPolygonsDataFrame"),
+    createsOutput(objectName = c("rasterMap","vegMap", "reprojectedShapefile", "ageMap"),
+                  objectClass = c("rasterLayer","rasterLayer", "SpatialPolygonsDataFrame","rasterLayer"),
                   desc = c("Raster input which might be a module output if not provided",
-                           "Raster object/layer/map cropped to your cropPolygon",
-                           "If crop is made from a shapefile, this is created in output folder"))
+                           "Raster object/layer/map cropped to your cropPolygon: vegetation map based on LCC2005",
+                           "If crop is made from a shapefile, this is created in output folder",
+                           "Raster object/layer/map cropped to your cropPolygon: forest age map"))
   )
 ))
 
@@ -96,8 +97,9 @@ doEvent.cropReproject = function(sim, eventTime, eventType) {
                                                      rasterMap = sim$rasterMap, useGdal = sim$useGdal, 
                                                      croppedRasterName =sim$croppedRasterName, cropFormat = sim$cropFormat,
                                                   funcRast = sim$funcRast)))
+        sim <- moveRasters(sim = sim, croppedRaster = sim$croppedRaster)
       }
-      
+
       if (sim$areaLimits=="random"){
         
         sim$croppedRaster <- Cache(cropRandomPolygon, polyMatrix = sim$polyMatrix, areaSize = sim$areaSize, 
@@ -108,13 +110,8 @@ doEvent.cropReproject = function(sim, eventTime, eventType) {
       
     },
     plot = {
-      require(stringr)
-      namesRasters <- str_match(sim$croppedRasterName, "/outputs/(.*?).tif")
-      ifelse(is.list(sim$croppedRaster),
-         {names(sim$croppedRaster) <- namesRasters[,2]
-         title <- namesRasters[,2]},
-         title <- "Cropped Raster")
-      quickPlot::Plot(sim$croppedRaster, title = title)
+        
+      # quickPlot::Plot(sim$croppedRaster, title = names(sim$croppedRaster))
     
     },
     save = {

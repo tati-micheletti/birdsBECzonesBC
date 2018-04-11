@@ -61,11 +61,15 @@ shapefile <- readRDS(filePathTemplate) %>%
   }
   
 } # End for loop
-
+         
   newRasterMap <- lapply(X = croppedRasterName, FUN = function(dstFile){
     obj <- raster(dstFile)
     return(obj)
   })
+  
+  require(stringr)
+  namesRasters <- str_match(croppedRasterName, "/outputs/(.*?).tif")
+  names(newRasterMap) <- namesRasters[,2]
 
  return(invisible(newRasterMap))
 }
