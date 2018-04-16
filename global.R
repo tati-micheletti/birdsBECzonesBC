@@ -26,10 +26,18 @@ objects = list(rasterMap = c(file.path(getwd(),"data","LCC2005_V1_4a.tif"),file.
                croppedRasterName = c(file.path(paths$outputPath,"vegMap.tif"), file.path(paths$outputPath,"ageMap.tif")),
                .globals = list(.plotInitialTime = 1))
 
-# dev.useRSGD(FALSE) # do not use Rstudio graphics device
-# dev() # opens external (non-RStudio) device, which is faster
-# clearPlot()
+dev.useRSGD(FALSE) # do not use Rstudio graphics device
+dev() # opens external (non-RStudio) device, which is faster
+clearPlot()
 
 ## Simulation setup
 mySim <- simInit(times = times, params = parameters, modules = modules, paths =  paths, objects = objects)
 system.time(mySimOut <- spades(mySim, debug = TRUE))
+
+# Visualizing outputs
+for (i in 2005:2010){
+  quickPlot::Plot(mySimOut$ageForest[[i]], title = paste0("Age forest in ",i))}
+
+for (i in 2005:2010){
+  plot(mySimOut$forestCover[[i]])}
+

@@ -66,7 +66,7 @@ doEvent.cropReproject = function(sim, eventTime, eventType) {
       sim <- Init(sim)
       
       # schedule future event(s)
-      sim <- scheduleEvent(sim, start(sim), "cropReproject", "crop")
+      sim <- scheduleEvent(sim, start(sim), "cropReproject", "crop", eventPriority = 1)
       sim <- scheduleEvent(sim, P(sim)$.plotInitialTime, "cropReproject", "plot")
       sim <- scheduleEvent(sim, P(sim)$.saveInitialTime, "cropReproject", "save")
     },

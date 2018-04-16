@@ -52,7 +52,7 @@ shapefile <- readRDS(filePathTemplate) %>%
              multi = TRUE, # Use multithreaded warping implementation.
              of = cropFormat, # Select the output format
              crop_to_cutline = TRUE, # Crop the raster to the shapefile
-             tr = res(rasterMapEach)) # Raster resolution, not sure it needs to be the same from original raster
+             tr = res(rasterProj)) # Raster resolution, not sure it needs to be the same from original raster
 
   } else {
 

@@ -1,8 +1,13 @@
 # Make a factor map, allowing for character labels
 
-reclassifyLcc <- function(sim = sim, lcc05VegTable = lcc05VegTable, lcc05VegReclass = lcc05VegReclass, lcc05TrajTable = lcc05TrajTable){
+reclassifyLcc <- function(sim = sim, 
+                          vegMap = sim$vegMap, 
+                          lcc05VegTable = sim$lcc05VegTable, 
+                          lcc05VegReclass = sim$lcc05VegReclass, 
+                          lcc05TrajTable = sim$lcc05TrajTable){
 
-sim$vegMapBeacons <- raster::ratify(raster::reclassify(sim$vegMap, lcc05VegTable))
+sim$vegMapBeacons <- raster::ratify(raster::reclassify(vegMap, lcc05VegTable))
+
 base::levels(sim$vegMapBeacons) <- data.frame(
   ID = lcc05VegReclass$VEG.reclass,
   Class = lcc05VegReclass$Description

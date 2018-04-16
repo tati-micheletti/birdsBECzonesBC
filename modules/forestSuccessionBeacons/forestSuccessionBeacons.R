@@ -52,7 +52,7 @@ doEvent.forestSuccessionBeacons <- function(sim, eventTime, eventType, debug = F
 
     # schedule the next event
     sim <- scheduleEvent(sim, params(sim)$forestSuccessionBeacons$startTime,
-                         "forestSuccessionBeacons", "succession", eventPriority = 5)
+                         "forestSuccessionBeacons", "succession", eventPriority = 4)
     sim <- scheduleEvent(sim, params(sim)$forestSuccessionBeacons$.plotInitialTime,
                         "forestSuccessionBeacons", "plot")
     sim <- scheduleEvent(sim, params(sim)$forestSuccessionBeacons$.saveInitialTime,
@@ -70,8 +70,11 @@ doEvent.forestSuccessionBeacons <- function(sim, eventTime, eventType, debug = F
     plot = {
       
     # do stuff for this event
-      Plot(sim$vegMap, title = paste0("Vegetation map in ",time(sim)))
-      Plot(sim$trajMap, title = paste0("Vegetation trajectory in ",time(sim)))
+
+      # quickPlot::Plot() not working! 
+
+      # Plot(sim$vegMap, title = paste0("Vegetation map in ",time(sim)))
+      # Plot(sim$trajMap, title = paste0("Vegetation trajectory in ",time(sim)))
     
     # ggplot
 
@@ -92,6 +95,7 @@ doEvent.forestSuccessionBeacons <- function(sim, eventTime, eventType, debug = F
             axis.title.x = element_text(size = 12, colour = "black"),
             axis.title.y = element_text(size = 12, colour = "black"),
             legend.position = "none")
+    
     Plot(sim$vegTypeDistribution, title = paste0("Vegetation type distribution in ",time(sim)))
     
     # schedule the next event
@@ -122,26 +126,3 @@ doEvent.forestSuccessionBeacons <- function(sim, eventTime, eventType, debug = F
 
   return(invisible(sim))
 }
-
-forestSuccessionSuccession <- function(sim) {
-  # assuming ageMap has zeros on it, this increases index to 1
-  sim$vegMap <- sim$vegMapBeacons
-  sim$trajMap <- sim$trajMapBeacons
-  ageMap.v <- round(raster::getValues(sim$ageMap)) + 1
-  trajMap.v <- raster::getValues(sim$trajMap)
-  sim$vegMap <- raster::setValues(sim$vegMap, sim$trajObj[cbind(ageMap.v, trajMap.v)])
-  return(invisible(sim))
-}
-
-outputForestCover <- function(sim) {
-  # store the output interval forest cover rasters
-  sim$forestCover[[time(sim)]] <- sim$vegMap
-  return(invisible(sim))
-}
-
-outputageForest <- function(sim) {
-  # store the output interval forest cover rasters
-  sim$ageForest[[time(sim)]] <- sim$ageMap
-  return(invisible(sim))
-}
-
