@@ -18,7 +18,7 @@ defineModule(sim, list(
   parameters = rbind(
     defineParameter("fireSize", "numeric", 1, NA, NA, desc = "Size for negative binomial distribution of fires"),
     defineParameter("drought", "numeric", 1.00, 0.8, 1.4, desc = "An arbitrary index of drought, where 1 is 'normal', and greater than 1 is more dry"),
-    defineParameter("nFires", "numeric", 1000L, 0L, 100L, desc = "Number of fires to initiate at each returnInterval"), #1000L
+    defineParameter("nFires", "numeric", 1000L, 0L, 100L, desc = "Number of fires to initiate at each returnInterval"),
     defineParameter("its", "numeric", 1e6, NA, NA, desc = "Maximum number of iterations for the spread algorithm"),
     defineParameter("burnStatsName", "character", "nPixelsBurned", NA, NA, desc = "Name for the burn statistics object"),
     defineParameter("persistprob", "numeric", 0.00, 0.00, 1.00, desc = "Probability that a burning cell will continue burning for 1 iteration"),

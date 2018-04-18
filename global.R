@@ -14,19 +14,22 @@ paths <- list(
 setPaths(modulePath = paths$modulePath, inputPath = paths$inputPath, outputPath = paths$outputPath, cachePath = paths$cachePath)
 
 ## list the modules to use
-modules <- list("cropReproject", "LccToBeaconsReclassify", "forestAge", "forestSuccessionBeacons", "fireSpreadLcc")
+modules <- list("prepingInputs") #, "LccToBeaconsReclassify", "forestAge", "forestSuccessionBeacons", "fireSpreadLcc")
 
 ## Set simulation and module parameters
 
-times <- list(start = 2005, end = 2010, timeunit = "year")
-parameters <- list(useGdal = TRUE)
-objects = list(rasterMap = c(file.path(getwd(),"data","LCC2005_V1_4a.tif"),file.path(getwd(),"data","can_age04_1km.tif")),
-               areaLimits = "defined", 
-               areaName = "British Columbia", 
-               croppedRasterName = c(file.path(paths$outputPath,"vegMap.tif"), file.path(paths$outputPath,"ageMap.tif")),
-               .globals = list(.plotInitialTime = 1))
+times <- list(start = 2005, end = 2005, timeunit = "year")
+parameters <- list(useWholeCountry = FALSE)
+objects <- list(url.ageMap = "ftp://ftp.daac.ornl.gov/data/nacp/NA_TreeAge//data/can_age04_1km.tif",
+                url.vegMap = "ftp://ftp.ccrs.nrcan.gc.ca/ad/NLCCLandCover/LandcoverCanada2005_250m/LandCoverOfCanada2005_V1_4.zip",
+                url.studyArea = paste0("http://www.bcstats.gov.bc.ca/Files/18885d4f-e4cf-443b-bb3b-d169651be62d",
+                                        "/Boundaries-CensusDivisions2011.zip"),
+                tempPath.ageMap = file.path(tempdir(), "ageMap"),
+                tempPath.vegMap = file.path(tempdir(), "vegMap"),
+                tempPath.studyArea = file.path(tempdir(), "studyArea"),
+                specificAreaToCropShapefile = "Vancouver Island")
 
-dev.useRSGD(FALSE) # do not use Rstudio graphics device
+dev.useRSGD(TRUE) # do not use Rstudio graphics device
 dev() # opens external (non-RStudio) device, which is faster
 clearPlot()
 

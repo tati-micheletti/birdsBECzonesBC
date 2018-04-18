@@ -72,11 +72,11 @@ doEvent.cropReproject = function(sim, eventTime, eventType) {
     },
     crop = {
 
-      if(all(is.null(sim$rasterMap)|!suppliedElsewhere(sim$rasterMap))){ # FIX FOR MORE THAN ONE RASTER
+      if(all(is.null(sim$rasterMap)|!suppliedElsewhere(sim$rasterMap))){
         invisible(readline(prompt="No raster to crop was provided. A sample raster (LCC2010, 250m) will be downloaded. Press [enter] to continue."))
         sim$rasterMap <- downloadRaster(sim = sim)}
       
-      if(all(!is.null(sim$rasterMap)&!file.exists(sim$rasterMap))){ # FIX FOR MORE THAN ONE RASTER
+      if(all(!is.null(sim$rasterMap)&!file.exists(sim$rasterMap))){
         invisible(readline(prompt="No raster to crop was provided. A sample raster (LCC2010, 250m) will be downloaded. Press [enter] to continue."))
         sim$rasterMap <- downloadRaster(sim = sim)}
       
@@ -156,16 +156,18 @@ Init <- function(sim) {
   if (is.null(sim$areaLimits)|!suppliedElsewhere(sim$areaLimits)){
     sim$areaLimits <- "random"
     warning("No area limits provided. Using a random area to crop.", call. = FALSE)}
-  if ((is.null(sim$areaName)&sim$areaLimits=="defined")|
-      (!suppliedElsewhere(sim$areaName)&sim$areaLimits=="defined")){
+  if ((is.null(sim$areaName)&sim$areaLimits=="defined")&!suppliedElsewhere(sim$filePathTemplate)|
+      (!suppliedElsewhere(sim$areaName)&sim$areaLimits=="defined"&!suppliedElsewhere(sim$filePathTemplate))){
     sim$areaName <- "British Columbia"
     warning(paste0("No defined area provided. Using ",sim$areaName, " area to crop."), call. = FALSE)}
   if (is.null(sim$funcRast)|!suppliedElsewhere(sim$funcRast)){
     sim$funcRast <- "mask"
     warning(paste0("Function for raster cropping not provided, using 'mask'."), call. = FALSE)}
-  if (is.null(sim$filePathTemplate)|!suppliedElsewhere(sim$filePathTemplate)){
+  if (is.null(sim$filePathTemplate)&(is.null(sim$areaName)|
+                                     is.null(sim$filePathTemplate)&!suppliedElsewhere(sim$areaName)|
+                                                                    !suppliedElsewhere(sim$filePathTemplate))){
     sim$filePathTemplate <- file.path(inputPath(sim),"fileTemplate.RData")
-    warning("filePathTemplate not provided. Using inputPath of simList and a random polygon template.", call. = FALSE)}
+    warning("Neither filePathTemplate nor areaName to crop were provided. Using inputPath of simList and a random polygon template.", call. = FALSE)}
 
   return(invisible(sim))
 }
