@@ -13,6 +13,7 @@ tempPath.vegMap <- file.path(tempdir(), "vegMap")
 tempPath.studyArea <- file.path(tempdir(), "studyArea")
 specificAreaToCropShapefile = "Vancouver Island"
 
+# =============== FIRST CASE: using prepInputs() for downloading files from the internet ===================
 
 # TEMPLATE RASTER
 templateRaster <- SpaDES.core::prepInputs(url = url.vegMap,
@@ -37,16 +38,23 @@ vegMap1 <- SpaDES.core::prepInputs(url = url.vegMap,
                         rasterToMatch = templateRaster,
                         studyArea = studyArea)
     
-# This crops, but doen't masks? doesn't have the legend?
+# This crops, but doesn't masks? doesn't have the legend?
 vegMap2 <- SpaDES.core::prepInputs(url = url.vegMap,
                         targetFile = file.path(tempPath.vegMap, "LCC2005_V1_4a.tif"),
                         destinationPath = tempPath.vegMap,
                         studyArea = studyArea)
-    
-# NOTE: I will use the same raster (vegMap) and just fastMask to studyArea so I don't duplicate the file
+
+#When trying to use fastMask()
+
+# Error in y[[x]] : no [[ method for object without attributes
+vegMap3 <- SpaDES.tools::fastMask(templateRaster, studyArea)
+
+
+# =============== SECOND CASE: using prepInputs() for files that are already in the local) ===================
 
 # AGE MAP
-# Doesn't work:   Don't know which file to load. Please specify targetFile ::  Error in if (x == "" | x == ".") { : argument is of length zero 
+
+# Don't know which file to load. Please specify targetFile ::  Error in if (x == "" | x == ".") { : argument is of length zero 
 ageMap1 <- SpaDES.core::prepInputs(destinationPath = file.path(getwd(), "modules/prepingInputs/data/can_age04_1km.tif"),
                         studyArea = studyArea)
 
@@ -54,6 +62,7 @@ ageMap1 <- SpaDES.core::prepInputs(destinationPath = file.path(getwd(), "modules
 ageMap2 <- SpaDES.core::prepInputs(destinationPath = file.path(getwd(), "modules/prepingInputs/data/can_age04_1km.tif"),
                                    targetFile = file.path(getwd(), "modules/prepingInputs/data/can_age04_1km.tif"),
                                    studyArea = studyArea)
+
 file.exists(file.path(getwd(), "modules/prepingInputs/data/can_age04_1km.tif")) # TRUE
 
 # Error: file.exists(checksumFile) is not TRUE 
