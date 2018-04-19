@@ -66,7 +66,6 @@ cache/backpack.db
 #.txt
 *.mxd
 .mxd
-*.txt
 *.cpg
 *.dbf
 *.lyr
