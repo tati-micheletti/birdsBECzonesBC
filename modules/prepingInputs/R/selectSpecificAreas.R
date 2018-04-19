@@ -14,17 +14,16 @@ require(RColorBrewer)
 }
 
 shp <- studyArea
-
-qual_col_pals <- brewer.pal.info[brewer.pal.info$category == 'qual',]
-col_vector <- unlist(mapply(brewer.pal, qual_col_pals$maxcolors, rownames(qual_col_pals)))
-
-names <- shp$CDNAME
-
 positions <- c(3,8,9,15,19,24,28) # Manually selected districts for the analysis
 
-for (i in positions){
-  plot(shp[shp$CDNAME == names[i], ], col = col_vector[i], add = TRUE)
-}
+# TO MAKE THE MAP COLORFUL:
+#qual_col_pals <- brewer.pal.info[brewer.pal.info$category == 'qual',]
+#col_vector <- unlist(mapply(brewer.pal, qual_col_pals$maxcolors, rownames(qual_col_pals)))
+#names <- shp$CDNAME
+
+# for (i in positions){
+#   plot(shp[shp$CDNAME == names[i], ], col = col_vector[i], add = TRUE)
+# }
 
 libs <- c("rgdal", "maptools", "gridExtra")
 lapply(libs, require, character.only = TRUE)
@@ -34,6 +33,7 @@ id <- new.shp$PRUID
 vc.union <- unionSpatialPolygons(new.shp, id)
 
 return(invisible(vc.union))
+  
   } else
     warning("specificAreas needs to be manually coded. It only works automatically for 'Vancouver Island'")
 }
