@@ -14,7 +14,7 @@ defineModule(sim, list(
   timeunit = "year",
   citation = list("citation.bib"),
   documentation = list("README.txt", "prepingInputs.Rmd"),
-  reqdPkgs = list("bcmaps", "sf", "dplyr", "RColorBrewer", "raster", "sp", "reproducible"),
+  reqdPkgs = list("bcmaps", "sf", "dplyr", "RColorBrewer", "raster", "sp", "reproducible", "data.table"),
   parameters = rbind(
     #defineParameter("paramName", "paramClass", value, min, max, "parameter description"),
        defineParameter(".useCache", "logical", FALSE, NA, NA, "Should this entire module be run with caching activated? This is generally intended for data-type modules, where stochasticity and time are not relevant"),
@@ -30,14 +30,17 @@ defineModule(sim, list(
     expectsInput(objectName = "tempPath.ageMap", objectClass = "character", desc = "Temporary path to downloaded age map", sourceURL = NA),
     expectsInput(objectName = "specificAreaToCropShapefile", objectClass = "character", desc = "So far only works with vancouver island and a part of the continent", sourceURL = NA),
     expectsInput(objectName = "templateRaster", objectClass = "character", desc = "Template raster for projection and resolution", sourceURL = NA),
-    expectsInput(objectName = "studyArea", objectClass = "shapefile", desc = "Shapefile to crop to", sourceURL = NA)
+    expectsInput(objectName = "studyArea", objectClass = "shapefile", desc = "Shapefile to crop to", sourceURL = NA),
+    expectsInput(objectName = "dataName", objectClass = "character", desc = "birdData Name not Path", sourceURL = NA),
+    expectsInput(objectName = "locationDataName", objectClass = "character", desc = "location file Name not Path", sourceURL = NA)
   ),
   outputObjects = bind_rows(
     #createsOutput("objectName", "objectClass", "output object description", ...),
     createsOutput(objectName = "templateRaster", objectClass = "RasterLayer", desc = "Template raster for projection and resolution"),
     createsOutput(objectName = "studyArea", objectClass = "shapefile", desc = "Shapefile to crop to"),
     createsOutput(objectName = "vegMap", objectClass = "RasterLayer", desc = "Vegetation map class raster"),
-    createsOutput(objectName = "ageMap", objectClass = "RasterLayer", desc = "Age class map raster")
+    createsOutput(objectName = "ageMap", objectClass = "RasterLayer", desc = "Age class map raster"),
+    createsOutput(objectName = "birdData", objectClass = "data.table", desc = "Birds data.table")
   )
 ))
 
@@ -47,10 +50,17 @@ doEvent.prepingInputs = function(sim, eventTime, eventType) {
     eventType,
     
     init = {
-      
+
       sim$templateRaster <- Cache(prepInputs, url = sim$url.vegMap,
                                              destinationPath = asPath(sim$tempPath.vegMap))
       unlink(sim$tempPath.vegMap, recursive = TRUE)
+      
+      # schedule future event(s)
+      sim <- scheduleEvent(sim, start(sim), "prepingInputs", "cropReprojectToStudyArea")
+      sim <- scheduleEvent(sim, start(sim), "prepingInputs", "cropDataToStudyArea")
+      
+    
+  }, cropReprojectToStudyArea = {
 
     if(P(sim)$useWholeCountry==FALSE){
       
@@ -61,35 +71,48 @@ doEvent.prepingInputs = function(sim, eventTime, eventType) {
       unlink(sim$tempPath.studyArea, recursive = TRUE)
 
       sim$vegMap <- Cache(prepInputs, url = sim$url.vegMap,
+                          targetFile = asPath(file.path(sim$tempPath.vegMap, "LCC2005_V1_4a.tif")),
                           destinationPath = asPath(sim$tempPath.vegMap),
                           rasterToMatch = sim$templateRaster,
                           studyArea = sim$studyArea)
       unlink(sim$tempPath.vegMap, recursive = TRUE)
       
-      sim$ageMap <- Cache(prepInputs, url = sim$url.ageMap,
-                          destinationPath = asPath(sim$tempPath.ageMap),
-                          rasterToMatch = sim$templateRaster,
+      Plot(sim$vegMap) # Take out after running !! -------------------------------
+      
+      sim$ageMap <- Cache(prepInputs, #url = sim$url.ageMap,
+                          targetFile = asPath(file.path(modulePath(sim), "prepingInputs/data/can_age04_1km.tif")),
+                          destinationPath = asPath(file.path(modulePath(sim), "prepingInputs/data/can_age04_1km.tif")),
                           studyArea = sim$studyArea)
       unlink(sim$tempPath.ageMap, recursive = TRUE)
+      
+      
+      Plot(sim$ageMap) # Take out after running !! -------------------------------
+      
       
     } else {
       
       sim$vegMap <- Cache(prepInputs, url = sim$url.vegMap,
+                          targetFile = asPath(file.path(sim$tempPath.vegMap, "LCC2005_V1_4a.tif")),
                           destinationPath = asPath(sim$tempPath.vegMap),
                           rasterToMatch = sim$templateRaster)
       unlink(sim$tempPath.vegMap, recursive = TRUE)
       
-      sim$ageMap <- Cache(prepInputs, url = sim$url.ageMap,
-                          destinationPath = asPath(sim$tempPath.ageMap),
+      sim$ageMap <- Cache(prepInputs, #url = sim$url.ageMap,
+                          targetFile = asPath(file.path(modulePath(sim), "prepingInputs/data/can_age04_1km.tif")),
+                          destinationPath = asPath(file.path(modulePath(sim), "prepingInputs/data/can_age04_1km.tif")),
                           rasterToMatch = sim$templateRaster)
-      unlink(sim$tempPath.ageMap, recursive = TRUE)
+      unlink(sim$tempPath.ageMap, recursive = TRUE)}
+      
+    }, cropDataToStudyArea = {
 
-    }
+      if (useWholeCountry == FALSE){
+      sim$birdData <- loadCroppedData(sim = sim, studyArea = sim$studyArea, 
+                                      dataPath = file.path(modulePath(sim), "prepingInputs/data/bird_vri_dat_ready.RData"))
+        } else {
       
+        # NEED TO LOAD BIRD FILE NORMALLY
+      }
       
-      # Take out after running !!
-Plot(sim$vegMap)
-Plot(sim$ageMap)
     },
    
     warning(paste("Undefined event type: '", current(sim)[1, "eventType", with = FALSE],
