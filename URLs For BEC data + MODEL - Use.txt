@@ -1,0 +1,16 @@
+http://www.climatewna.com/rasters/climateBC/bec/BEC_subz_VI.zip
+http://www.climatewna.com/rasters/climateBC/bec/BEC_subz_VI_2050s.zip
+
+data to use: 
+
+Variables for model:
+"Age"
+"YYYY"
+"SS" --> 
+"BEC_SUBZONE" --> Alternative for only Vancouver Island
+"BEC_ZONE_CODE" --> Alternative for BC
+"OFFSET"
+"SPECIES_CD_1" --> in columns with values from "SPECIES_PCT_1"
+"sumABUND" -- RESPONSE VARIABLE
+
+"speciesCOUNT" --> "SpeciesGroup" (not in the model, but maybe used for different groups' models?) 
