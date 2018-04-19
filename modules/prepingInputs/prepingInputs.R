@@ -14,7 +14,7 @@ defineModule(sim, list(
   timeunit = "year",
   citation = list("citation.bib"),
   documentation = list("README.txt", "prepingInputs.Rmd"),
-  reqdPkgs = list("bcmaps", "sf", "dplyr", "RColorBrewer", "raster", "sp"),
+  reqdPkgs = list("bcmaps", "sf", "dplyr", "RColorBrewer", "raster", "sp", "reproducible"),
   parameters = rbind(
     #defineParameter("paramName", "paramClass", value, min, max, "parameter description"),
        defineParameter(".useCache", "logical", FALSE, NA, NA, "Should this entire module be run with caching activated? This is generally intended for data-type modules, where stochasticity and time are not relevant"),
@@ -56,9 +56,9 @@ doEvent.prepingInputs = function(sim, eventTime, eventType) {
       
       sim$studyArea <- Cache(prepInputs, url = sim$url.studyArea,
                              destinationPath = sim$tempPath.studyArea,
-                             rasterToMatch = sim$templateRaster) 
-      sim$studyArea <- selectSpecificAreas(sim$studyArea, specificAreas = sim$specificAreaToCropShapefile)
-      unlink(sim$tempPath.studydArea, recursive = TRUE)
+                             rasterToMatch = sim$templateRaster) %>%
+             selectSpecificAreas(specificAreas = sim$specificAreaToCropShapefile)
+      unlink(sim$tempPath.studyArea, recursive = TRUE)
 
       sim$vegMap <- Cache(prepInputs, url = sim$url.vegMap,
                           destinationPath = asPath(sim$tempPath.vegMap),
