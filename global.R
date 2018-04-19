@@ -27,7 +27,9 @@ objects <- list(url.ageMap = "ftp://ftp.daac.ornl.gov/data/nacp/NA_TreeAge//data
                 tempPath.ageMap = file.path(tempdir(), "ageMap"),
                 tempPath.vegMap = file.path(tempdir(), "vegMap"),
                 tempPath.studyArea = file.path(tempdir(), "studyArea"),
-                specificAreaToCropShapefile = "Vancouver Island")
+                specificAreaToCropShapefile = "Vancouver Island",
+                dataName = "bird_vri_dat_ready.RData",
+                locationDataName = "xy.ss.covar.pkey.method_nomissing.RData")
 
 dev.useRSGD(TRUE) # do not use Rstudio graphics device
 dev() # opens external (non-RStudio) device, which is faster

@@ -53,7 +53,7 @@ doEvent.prepingInputs = function(sim, eventTime, eventType) {
 
       sim$templateRaster <- Cache(prepInputs, url = sim$url.vegMap,
                                              destinationPath = asPath(sim$tempPath.vegMap))
-      unlink(sim$tempPath.vegMap, recursive = TRUE)
+#      unlink(sim$tempPath.vegMap, recursive = TRUE)
       
       # schedule future event(s)
       sim <- scheduleEvent(sim, start(sim), "prepingInputs", "cropReprojectToStudyArea")
@@ -70,44 +70,45 @@ doEvent.prepingInputs = function(sim, eventTime, eventType) {
              selectSpecificAreas(specificAreas = sim$specificAreaToCropShapefile)
       unlink(sim$tempPath.studyArea, recursive = TRUE)
 
-      sim$vegMap <- Cache(prepInputs, url = sim$url.vegMap,
-                          targetFile = asPath(file.path(sim$tempPath.vegMap, "LCC2005_V1_4a.tif")),
-                          destinationPath = asPath(sim$tempPath.vegMap),
-                          rasterToMatch = sim$templateRaster,
-                          studyArea = sim$studyArea)
-      unlink(sim$tempPath.vegMap, recursive = TRUE)
+      # sim$vegMap <- Cache(prepInputs, url = sim$url.vegMap,
+      #                     targetFile = asPath(file.path(sim$tempPath.vegMap, "LCC2005_V1_4a.tif")),
+      #                     destinationPath = asPath(sim$tempPath.vegMap),
+      #                     rasterToMatch = sim$templateRaster,
+      #                     studyArea = sim$studyArea)
+      # unlink(sim$tempPath.vegMap, recursive = TRUE)
       
-      Plot(sim$vegMap) # Take out after running !! -------------------------------
+      # Plot(sim$vegMap) # Take out after running !! -------------------------------
+      # 
+      # sim$ageMap <- Cache(prepInputs, #url = sim$url.ageMap,
+      #                     targetFile = asPath(file.path(modulePath(sim), "prepingInputs/data/can_age04_1km.tif")),
+      #                     destinationPath = asPath(file.path(modulePath(sim), "prepingInputs/data/can_age04_1km.tif")),
+      #                     studyArea = sim$studyArea)
+      # unlink(sim$tempPath.ageMap, recursive = TRUE)
+      # 
+      # 
+      # Plot(sim$ageMap) # Take out after running !! -------------------------------
       
-      sim$ageMap <- Cache(prepInputs, #url = sim$url.ageMap,
-                          targetFile = asPath(file.path(modulePath(sim), "prepingInputs/data/can_age04_1km.tif")),
-                          destinationPath = asPath(file.path(modulePath(sim), "prepingInputs/data/can_age04_1km.tif")),
-                          studyArea = sim$studyArea)
-      unlink(sim$tempPath.ageMap, recursive = TRUE)
       
-      
-      Plot(sim$ageMap) # Take out after running !! -------------------------------
-      
-      
-    } else {
-      
-      sim$vegMap <- Cache(prepInputs, url = sim$url.vegMap,
-                          targetFile = asPath(file.path(sim$tempPath.vegMap, "LCC2005_V1_4a.tif")),
-                          destinationPath = asPath(sim$tempPath.vegMap),
-                          rasterToMatch = sim$templateRaster)
-      unlink(sim$tempPath.vegMap, recursive = TRUE)
-      
-      sim$ageMap <- Cache(prepInputs, #url = sim$url.ageMap,
-                          targetFile = asPath(file.path(modulePath(sim), "prepingInputs/data/can_age04_1km.tif")),
-                          destinationPath = asPath(file.path(modulePath(sim), "prepingInputs/data/can_age04_1km.tif")),
-                          rasterToMatch = sim$templateRaster)
-      unlink(sim$tempPath.ageMap, recursive = TRUE)}
+    # } else {
+    #   
+    #   sim$vegMap <- Cache(prepInputs, url = sim$url.vegMap,
+    #                       targetFile = asPath(file.path(sim$tempPath.vegMap, "LCC2005_V1_4a.tif")),
+    #                       destinationPath = asPath(sim$tempPath.vegMap),
+    #                       rasterToMatch = sim$templateRaster)
+    #   unlink(sim$tempPath.vegMap, recursive = TRUE)
+    #   
+    #   sim$ageMap <- Cache(prepInputs, #url = sim$url.ageMap,
+    #                       targetFile = asPath(file.path(modulePath(sim), "prepingInputs/data/can_age04_1km.tif")),
+    #                       destinationPath = asPath(file.path(modulePath(sim), "prepingInputs/data/can_age04_1km.tif")),
+    #                       rasterToMatch = sim$templateRaster)
+    #   unlink(sim$tempPath.ageMap, recursive = TRUE)}
+      }
       
     }, cropDataToStudyArea = {
 
-      if (useWholeCountry == FALSE){
+      if (P(sim)$useWholeCountry == FALSE){
       sim$birdData <- loadCroppedData(sim = sim, studyArea = sim$studyArea, 
-                                      dataPath = file.path(modulePath(sim), "prepingInputs/data/bird_vri_dat_ready.RData"))
+                                      dataPath = file.path(modulePath(sim), "prepingInputs/data"))
         } else {
       
         # NEED TO LOAD BIRD FILE NORMALLY

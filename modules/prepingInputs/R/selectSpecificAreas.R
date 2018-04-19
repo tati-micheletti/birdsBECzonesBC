@@ -4,14 +4,10 @@ selectSpecificAreas <- function(studyArea = sim$studyArea,
 
 
   if (specificAreas == "Vancouver Island"){  
-require(bcmaps)
+
 require(sf)
 require(dplyr)
-require(RColorBrewer)
-
-  if(!any(grepl(x = installed.packages()[,1], pattern = "bcmaps.rdata"))){
-    install.packages('bcmaps.rdata', repos='https://bcgov.github.io/drat/')
-}
+# require(RColorBrewer)
 
 shp <- studyArea
 positions <- c(3,8,9,15,19,24,28) # Manually selected districts for the analysis
