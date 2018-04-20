@@ -69,11 +69,15 @@ doEvent.prepingInputs = function(sim, eventTime, eventType) {
                                destinationPath = sim$tempPath.studyArea,
                                rasterToMatch = sim$templateRaster) %>%
           selectSpecificAreas(specificAreas = sim$specificAreaToCropShapefile)
+        
+        browser()
+        
+      
         pid <- sapply(slot(sim$studyArea, "polygons"), function(x) slot(x, "ID")) # Extract polygon ID's
         pdf <- data.frame(ID=1:length(sim$studyArea), row.names = pid)       # Create dataframe with correct rownames
-        sim$studyArea <- SpatialPolygonsDataFrame(sim$studyArea, pdf)      # Try coersion again and check class
-    class(sim$studyArea)
-        writeOGR(obj = sim$studyArea, dsn = file.path(inputPath(sim), "studyArea.shp"), driver = "ESRI Shapefile")
+        studyAreaDF <- SpatialPolygonsDataFrame(sim$studyArea, pdf)      # Try coersion again and check class
+    class(studyAreaDF)
+        writeOGR(obj = studyAreaDF, dsn = file.path(inputPath(sim), "studyArea.shp"), driver = "ESRI Shapefile")
         
       } else {
         
@@ -82,8 +86,6 @@ doEvent.prepingInputs = function(sim, eventTime, eventType) {
                             destinationPath = asPath(file.path(inputPath(sim))),
                             rasterToMatch = sim$templateRaster)
       }
-      
-      browser()
       
       library("rgdal")
       studyAreaDF <- readOGR(file.path(inputPath(sim), "studyArea.shp"), layer = "studyArea.shp")
