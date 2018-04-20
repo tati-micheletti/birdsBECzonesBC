@@ -14,7 +14,7 @@ defineModule(sim, list(
   timeunit = "year",
   citation = list("citation.bib"),
   documentation = list("README.txt", "prepingInputs.Rmd"),
-  reqdPkgs = list("bcmaps", "sf", "dplyr", "RColorBrewer", "raster", "sp", "reproducible", "data.table"),
+  reqdPkgs = list("sf", "dplyr", "RColorBrewer", "raster", "sp", "reproducible", "data.table","rgdal"),
   parameters = rbind(
     #defineParameter("paramName", "paramClass", value, min, max, "parameter description"),
        defineParameter(".useCache", "logical", FALSE, NA, NA, "Should this entire module be run with caching activated? This is generally intended for data-type modules, where stochasticity and time are not relevant"),
@@ -64,45 +64,58 @@ doEvent.prepingInputs = function(sim, eventTime, eventType) {
 
     if(P(sim)$useWholeCountry==FALSE){
       
-      sim$studyArea <- Cache(prepInputs, url = sim$url.studyArea,
-                             destinationPath = sim$tempPath.studyArea,
-                             rasterToMatch = sim$templateRaster) %>%
-             selectSpecificAreas(specificAreas = sim$specificAreaToCropShapefile)
-      unlink(sim$tempPath.studyArea, recursive = TRUE)
-
-      # sim$vegMap <- Cache(prepInputs, url = sim$url.vegMap,
-      #                     targetFile = asPath(file.path(sim$tempPath.vegMap, "LCC2005_V1_4a.tif")),
-      #                     destinationPath = asPath(sim$tempPath.vegMap),
-      #                     rasterToMatch = sim$templateRaster,
-      #                     studyArea = sim$studyArea)
-      # unlink(sim$tempPath.vegMap, recursive = TRUE)
-      
-      # Plot(sim$vegMap) # Take out after running !! -------------------------------
-      # 
-      # sim$ageMap <- Cache(prepInputs, #url = sim$url.ageMap,
-      #                     targetFile = asPath(file.path(modulePath(sim), "prepingInputs/data/can_age04_1km.tif")),
-      #                     destinationPath = asPath(file.path(modulePath(sim), "prepingInputs/data/can_age04_1km.tif")),
-      #                     studyArea = sim$studyArea)
-      # unlink(sim$tempPath.ageMap, recursive = TRUE)
-      # 
-      # 
-      # Plot(sim$ageMap) # Take out after running !! -------------------------------
-      
-      
-    # } else {
-    #   
-    #   sim$vegMap <- Cache(prepInputs, url = sim$url.vegMap,
-    #                       targetFile = asPath(file.path(sim$tempPath.vegMap, "LCC2005_V1_4a.tif")),
-    #                       destinationPath = asPath(sim$tempPath.vegMap),
-    #                       rasterToMatch = sim$templateRaster)
-    #   unlink(sim$tempPath.vegMap, recursive = TRUE)
-    #   
-    #   sim$ageMap <- Cache(prepInputs, #url = sim$url.ageMap,
-    #                       targetFile = asPath(file.path(modulePath(sim), "prepingInputs/data/can_age04_1km.tif")),
-    #                       destinationPath = asPath(file.path(modulePath(sim), "prepingInputs/data/can_age04_1km.tif")),
-    #                       rasterToMatch = sim$templateRaster)
-    #   unlink(sim$tempPath.ageMap, recursive = TRUE)}
+      if(!file.exists(file.path(inputPath(sim), "studyArea.shp"))){
+        sim$studyArea <- Cache(prepInputs, url = sim$url.studyArea,
+                               destinationPath = sim$tempPath.studyArea,
+                               rasterToMatch = sim$templateRaster) %>%
+          selectSpecificAreas(specificAreas = sim$specificAreaToCropShapefile)
+        writeOGR(obj = sim$studyArea, dsn = file.path(inputPath(sim), "studyArea.shp"), driver = "ESRI Shapefile")
+      } else {
+        
+        sim$studyArea <- Cache(prepInputs, 
+                            targetFile = asPath(file.path(inputPath(sim), "studyArea.shp")),
+                            destinationPath = asPath(file.path(inputPath(sim))),
+                            rasterToMatch = sim$templateRaster)
       }
+      
+      browser()
+       
+      library("rgdal")
+      studyAreaDF <- readOGR(file.path(sim$tempPath.studyArea, "CD_2011.shp"),layer = "CD_2011.shp")
+      # studyAreaDF <- SpatialPolygonsDataFrame(sim$studyArea,data=as.data.frame("studyArea")) # CRS <=======
+       sim$vegMap <-SpaDES.tools::Cache(fastMask, sim$templateRaster, studyAreaDF)
+       # sim$vegMap <- Cache(prepInputs, url = sim$url.vegMap,
+       #                     targetFile = asPath(file.path(sim$tempPath.vegMap, "LCC2005_V1_4a.tif")),
+       #                     destinationPath = asPath(sim$tempPath.vegMap),
+       #                     studyArea = sim$studyArea)
+#       unlink(sim$tempPath.vegMap, recursive = TRUE)
+
+       Plot(sim$vegMap) # Take out after running !! -------------------------------
+      
+       sim$ageMap <- Cache(prepInputs, url = sim$url.ageMap,
+                           targetFile = asPath(file.path(modulePath(sim), "prepingInputs/data/can_age04_1km.tif")),
+                           destinationPath = asPath(file.path(modulePath(sim), "prepingInputs/data")),
+                           rasterToMatch = sim$vegMap)
+ #                          studyArea = sim$studyArea)
+#       unlink(sim$tempPath.ageMap, recursive = TRUE)
+      
+      
+       Plot(sim$ageMap)  #Take out after running !! -------------------------------
+
+
+     } else {
+    
+       sim$vegMap <- Cache(prepInputs, url = sim$url.vegMap,
+                           targetFile = asPath(file.path(sim$tempPath.vegMap, "LCC2005_V1_4a.tif")),
+                           destinationPath = asPath(sim$tempPath.vegMap))
+       unlink(sim$tempPath.vegMap, recursive = TRUE)
+    
+       sim$ageMap <- Cache(prepInputs, url = sim$url.ageMap,
+                           targetFile = asPath(file.path(modulePath(sim), "prepingInputs/data/can_age04_1km.tif")),
+                           destinationPath = asPath(file.path(modulePath(sim), "prepingInputs/data")),
+                           rasterToMatch = sim$vegMap)
+       unlink(sim$tempPath.ageMap, recursive = TRUE)}
+
       
     }, cropDataToStudyArea = {
 
@@ -134,7 +147,7 @@ doEvent.prepingInputs = function(sim, eventTime, eventType) {
     }
 
     if (!suppliedElsewhere(sim$url.ageMap)){
-      url.ageMap <- "ftp://ftp.daac.ornl.gov/data/nacp/NA_TreeAge//data/can_age04_1km.tif"
+      url.ageMap <- "https://drive.google.com/open?id=1lwszwnFjZ3DQ3BBQ7ikiAlN6FXyy2uNX"
       warning(paste("You did not provide an url for age map. The module will use: ", url.ageMap), call. = FALSE)
     }
     
