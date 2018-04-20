@@ -92,3 +92,4 @@ cache/backpack.db
 *.pub
 sshkeygen
 .httr-oauth
+.httr-oauth-SUSPENDED
