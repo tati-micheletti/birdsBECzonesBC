@@ -69,7 +69,12 @@ doEvent.prepingInputs = function(sim, eventTime, eventType) {
                                destinationPath = sim$tempPath.studyArea,
                                rasterToMatch = sim$templateRaster) %>%
           selectSpecificAreas(specificAreas = sim$specificAreaToCropShapefile)
+        pid <- sapply(slot(sim$studyArea, "polygons"), function(x) slot(x, "ID")) # Extract polygon ID's
+        pdf <- data.frame(ID=1:length(sim$studyArea), row.names = pid)       # Create dataframe with correct rownames
+        sim$studyArea <- SpatialPolygonsDataFrame(sim$studyArea, pdf)      # Try coersion again and check class
+    class(sim$studyArea)
         writeOGR(obj = sim$studyArea, dsn = file.path(inputPath(sim), "studyArea.shp"), driver = "ESRI Shapefile")
+        
       } else {
         
         sim$studyArea <- Cache(prepInputs, 
@@ -79,9 +84,9 @@ doEvent.prepingInputs = function(sim, eventTime, eventType) {
       }
       
       browser()
-       
+      
       library("rgdal")
-      studyAreaDF <- readOGR(file.path(sim$tempPath.studyArea, "CD_2011.shp"),layer = "CD_2011.shp")
+      studyAreaDF <- readOGR(file.path(inputPath(sim), "studyArea.shp"), layer = "studyArea.shp")
       # studyAreaDF <- SpatialPolygonsDataFrame(sim$studyArea,data=as.data.frame("studyArea")) # CRS <=======
        sim$vegMap <-SpaDES.tools::Cache(fastMask, sim$templateRaster, studyAreaDF)
        # sim$vegMap <- Cache(prepInputs, url = sim$url.vegMap,
