@@ -16,12 +16,10 @@ defineModule(sim, list(
   documentation = list("README.txt", "prepingInputs.Rmd"),
   reqdPkgs = list("sf", "dplyr", "RColorBrewer", "raster", "sp", "reproducible", "data.table","rgdal"),
   parameters = rbind(
-    #defineParameter("paramName", "paramClass", value, min, max, "parameter description"),
        defineParameter(".useCache", "logical", FALSE, NA, NA, "Should this entire module be run with caching activated? This is generally intended for data-type modules, where stochasticity and time are not relevant"),
        defineParameter("useWholeCountry", "logical", FALSE, NA, NA, "Should this module be run on the whole country?")
   ),
   inputObjects = bind_rows(
-    #expectsInput("objectName", "objectClass", "input object description", sourceURL, ...),
     expectsInput(objectName = "url.studyArea", objectClass = "character", desc = NA, sourceURL = NA),
     expectsInput(objectName = "url.vegMap", objectClass = "character", desc = NA, sourceURL = NA),
     expectsInput(objectName = "url.ageMap", objectClass = "character", desc = NA, sourceURL = NA),
@@ -35,7 +33,6 @@ defineModule(sim, list(
     expectsInput(objectName = "locationDataName", objectClass = "character", desc = "location file Name not Path", sourceURL = NA)
   ),
   outputObjects = bind_rows(
-    #createsOutput("objectName", "objectClass", "output object description", ...),
     createsOutput(objectName = "templateRaster", objectClass = "RasterLayer", desc = "Template raster for projection and resolution"),
     createsOutput(objectName = "studyArea", objectClass = "shapefile", desc = "Shapefile to crop to"),
     createsOutput(objectName = "vegMap", objectClass = "RasterLayer", desc = "Vegetation map class raster"),
@@ -53,8 +50,7 @@ doEvent.prepingInputs = function(sim, eventTime, eventType) {
 
       sim$templateRaster <- Cache(prepInputs, url = sim$url.vegMap,
                                              destinationPath = asPath(sim$tempPath.vegMap))
-#      unlink(sim$tempPath.vegMap, recursive = TRUE)
-      
+
       # schedule future event(s)
       sim <- scheduleEvent(sim, start(sim), "prepingInputs", "cropReprojectToStudyArea")
       sim <- scheduleEvent(sim, start(sim), "prepingInputs", "cropDataToStudyArea")
@@ -70,14 +66,10 @@ doEvent.prepingInputs = function(sim, eventTime, eventType) {
                                rasterToMatch = sim$templateRaster) %>%
           selectSpecificAreas(specificAreas = sim$specificAreaToCropShapefile)
         
-        browser()
-        
-      
         pid <- sapply(slot(sim$studyArea, "polygons"), function(x) slot(x, "ID")) # Extract polygon ID's
         pdf <- data.frame(ID=1:length(sim$studyArea), row.names = pid)       # Create dataframe with correct rownames
         studyAreaDF <- SpatialPolygonsDataFrame(sim$studyArea, pdf)      # Try coersion again and check class
-    class(studyAreaDF)
-        writeOGR(obj = studyAreaDF, dsn = file.path(inputPath(sim), "studyArea.shp"), driver = "ESRI Shapefile")
+        writeOGR(obj = studyAreaDF, dsn = file.path(inputPath(sim), "studyArea.shp"), layer = "studyArea.shp", driver = "ESRI Shapefile")
         
       } else {
         
@@ -85,29 +77,23 @@ doEvent.prepingInputs = function(sim, eventTime, eventType) {
                             targetFile = asPath(file.path(inputPath(sim), "studyArea.shp")),
                             destinationPath = asPath(file.path(inputPath(sim))),
                             rasterToMatch = sim$templateRaster)
-      }
-      
-      library("rgdal")
-      studyAreaDF <- readOGR(file.path(inputPath(sim), "studyArea.shp"), layer = "studyArea.shp")
-      # studyAreaDF <- SpatialPolygonsDataFrame(sim$studyArea,data=as.data.frame("studyArea")) # CRS <=======
-       sim$vegMap <-SpaDES.tools::Cache(fastMask, sim$templateRaster, studyAreaDF)
-       # sim$vegMap <- Cache(prepInputs, url = sim$url.vegMap,
-       #                     targetFile = asPath(file.path(sim$tempPath.vegMap, "LCC2005_V1_4a.tif")),
-       #                     destinationPath = asPath(sim$tempPath.vegMap),
-       #                     studyArea = sim$studyArea)
-#       unlink(sim$tempPath.vegMap, recursive = TRUE)
 
-       Plot(sim$vegMap) # Take out after running !! -------------------------------
+        studyAreaDF <- readOGR(dsn = file.path(inputPath(sim),"studyArea.shp"))
+        
+        }
+       
+       sim$vegMap <- Cache(raster::crop, sim$templateRaster, sim$studyArea)
+       sim$vegMap <- Cache(fastMask, sim$vegMap, studyAreaDF) # if not needed, comment lines pid, pdf
+
+       Plot(sim$vegMap, title = "Vegetation Map") # Take out after running !! -------------------------------
       
        sim$ageMap <- Cache(prepInputs, url = sim$url.ageMap,
                            targetFile = asPath(file.path(modulePath(sim), "prepingInputs/data/can_age04_1km.tif")),
                            destinationPath = asPath(file.path(modulePath(sim), "prepingInputs/data")),
                            rasterToMatch = sim$vegMap)
- #                          studyArea = sim$studyArea)
-#       unlink(sim$tempPath.ageMap, recursive = TRUE)
-      
-      
-       Plot(sim$ageMap)  #Take out after running !! -------------------------------
+                          studyArea = sim$studyArea)
+
+       Plot(sim$ageMap, title = "Age Map")  #Take out after running !! -------------------------------
 
 
      } else {
