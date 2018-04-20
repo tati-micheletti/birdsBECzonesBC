@@ -55,7 +55,7 @@ vegMap3 <- SpaDES.tools::fastMask(templateRaster, studyArea)
 # AGE MAP
 
 # Don't know which file to load. Please specify targetFile ::  Error in if (x == "" | x == ".") { : argument is of length zero 
-ageMap1 <- SpaDES.core::prepInputs(destinationPath = file.path(getwd(), "modules/prepingInputs/data/can_age04_1km.tif"),
+ageMap1 <- SpaDES.core::prepInputs(destinationPath = file.path(getwd(), "modules/prepingInputs/data"),
                         studyArea = studyArea)
 
 #Error in .local(.Object, ...) : Cannot create a RasterLayer object from this file. (file does not exist) 
