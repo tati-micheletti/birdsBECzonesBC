@@ -87,25 +87,46 @@ doEvent.prepingInputs = function(sim, eventTime, eventType) {
 
        Plot(sim$vegMap, title = "Vegetation Map") # Take out after running !! -------------------------------
       
+       if(!file.exists(file.path(inputPath(sim), "can_age04_1km.tif"))){
        sim$ageMap <- Cache(prepInputs, url = sim$url.ageMap,
-                           targetFile = asPath(file.path(modulePath(sim), "prepingInputs/data/can_age04_1km.tif")),
-                           destinationPath = asPath(file.path(modulePath(sim), "prepingInputs/data")),
+                           targetFile = asPath(file.path(inputPath(sim), "can_age04_1km.tif")),
+                           destinationPath = asPath(file.path(inputPath(sim))),
                            rasterToMatch = sim$vegMap)
-       browser()
 
-       Plot(sim$ageMap, title = "Age Map")  #Take out after running !! -------------------------------
-
+       } else {
+      
+      sim$ageMap <- raster::raster(file.path(inputPath(sim), "can_age04_1km.tif")) #%>%
+#        postProcess(rasterToMatch = sim$vegMap) ==> If this works, I can take out from lines 103 - 116.
+      
+      cutlinePath <- file.path(inputPath(sim), "studyArea.shp")
+      
+      gdalUtils::gdalwarp(srcfile = file.path(inputPath(sim), "can_age04_1km.tif"), # Raster file path
+               dstfile = file.path(inputPath(sim), "can_age04_1km_cropped.tif"), # Cropped raster file name
+               overwrite = TRUE, # If you alreday have a raster with the same name and want to overwrite it
+               cutline = cutlinePath, # Shapefile path to use for masking
+               dstalpha = TRUE, # Creates an output alpha band to identify nodata (unset/transparent) pixels
+               s_srs = as.character(crs(sim$ageMap)), #Projection from the source raster file
+               t_srs = as.character(crs(sim$vegMap)), # Projection for the cropped file, it is possible to change projection here
+               multi = TRUE, # Use multithreaded warping implementation.
+               of = "GTiff", # Select the output format
+               crop_to_cutline = TRUE, # Crop the raster to the shapefile
+               tr = res(sim$vegMap)) # Raster resolution, not sure it needs to be the same from original raster
+      sim$ageMap <- raster::raster(file.path(inputPath(sim), "can_age04_1km_cropped.tif"))
+      
+      
+      Plot(sim$ageMap, title = "Age Map")  #Take out after running !! -------------------------------
+}
 
      } else {
-    
+      
        sim$vegMap <- Cache(prepInputs, url = sim$url.vegMap,
                            targetFile = asPath(file.path(sim$tempPath.vegMap, "LCC2005_V1_4a.tif")),
                            destinationPath = asPath(sim$tempPath.vegMap))
        # unlink(sim$tempPath.vegMap, recursive = TRUE)
     
        sim$ageMap <- Cache(prepInputs, url = sim$url.ageMap,
-                           targetFile = asPath(file.path(modulePath(sim), "prepingInputs/data/can_age04_1km.tif")),
-                           destinationPath = asPath(file.path(modulePath(sim), "prepingInputs/data")),
+                           targetFile = asPath(file.path(sim$tempPath.ageMap, "can_age04_1km.tif")),
+                           destinationPath = asPath(sim$tempPath.ageMap),
                            rasterToMatch = sim$vegMap)
      }
        # unlink(sim$tempPath.ageMap, recursive = TRUE)}
@@ -115,7 +136,7 @@ doEvent.prepingInputs = function(sim, eventTime, eventType) {
 
       if (P(sim)$useWholeCountry == FALSE){
       sim$birdData <- loadCroppedData(sim = sim, studyArea = sim$studyArea, 
-                                      dataPath = file.path(modulePath(sim), "prepingInputs/data"))
+                                      dataPath = file.path(inputPath(sim)))
         } else {
       
         # NEED TO LOAD BIRD FILE NORMALLY
