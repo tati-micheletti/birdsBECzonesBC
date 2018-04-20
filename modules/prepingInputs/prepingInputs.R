@@ -91,7 +91,7 @@ doEvent.prepingInputs = function(sim, eventTime, eventType) {
                            targetFile = asPath(file.path(modulePath(sim), "prepingInputs/data/can_age04_1km.tif")),
                            destinationPath = asPath(file.path(modulePath(sim), "prepingInputs/data")),
                            rasterToMatch = sim$vegMap)
-                          studyArea = sim$studyArea)
+       browser()
 
        Plot(sim$ageMap, title = "Age Map")  #Take out after running !! -------------------------------
 
@@ -101,13 +101,14 @@ doEvent.prepingInputs = function(sim, eventTime, eventType) {
        sim$vegMap <- Cache(prepInputs, url = sim$url.vegMap,
                            targetFile = asPath(file.path(sim$tempPath.vegMap, "LCC2005_V1_4a.tif")),
                            destinationPath = asPath(sim$tempPath.vegMap))
-       unlink(sim$tempPath.vegMap, recursive = TRUE)
+       # unlink(sim$tempPath.vegMap, recursive = TRUE)
     
        sim$ageMap <- Cache(prepInputs, url = sim$url.ageMap,
                            targetFile = asPath(file.path(modulePath(sim), "prepingInputs/data/can_age04_1km.tif")),
                            destinationPath = asPath(file.path(modulePath(sim), "prepingInputs/data")),
                            rasterToMatch = sim$vegMap)
-       unlink(sim$tempPath.ageMap, recursive = TRUE)}
+     }
+       # unlink(sim$tempPath.ageMap, recursive = TRUE)}
 
       
     }, cropDataToStudyArea = {
