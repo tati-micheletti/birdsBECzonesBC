@@ -31,9 +31,9 @@ objects <- list(url.ageMap = "https://drive.google.com/open?id=1lwszwnFjZ3DQ3BBQ
                 dataName = "bird_vri_dat_ready.RData",
                 locationDataName = "xy.ss.covar.pkey.method_nomissing.RData")
 
-dev.useRSGD(TRUE) # do not use Rstudio graphics device
-dev() # opens external (non-RStudio) device, which is faster
-clearPlot()
+# dev.useRSGD(TRUE) # do not use Rstudio graphics device
+# dev() # opens external (non-RStudio) device, which is faster
+# clearPlot()
 
 ## Simulation setup
 mySim <- simInit(times = times, params = parameters, modules = modules, paths =  paths, objects = objects)
