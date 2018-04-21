@@ -51,16 +51,55 @@ names(location) <- c("SS_derived", "X", "Y")
 
 birdData <- merge(x = birdData, y = location, by = "SS_derived")
 
-# reproject studyArea to match latlong
-studyAreaToCrop <- sp::spTransform(studyArea, CRSobj = "+init=epsg:4326")
+# reproject studyArea to match data
+
+# ============= ALL BELOW FAILED SO FAR ======================
+
+browser()
+
+
+# Getting only the points
+
+points <- data.frame(X = birdData$X, Y = birdData$Y) %>%
+  SpatialPoints()
+
+epsg4267 <- "+init=epsg:4267"
+epsg4326 <- "+init=epsg:4326"
+epsg4269 <- "+init=epsg:4269"
+LCC05 <- "+proj=lcc +lat_1=49 +lat_2=77 +lat_0=0 +lon_0=-95 +x_0=0 +y_0=0 +ellps=GRS80 +units=m +no_defs"
+LambertsConformalConic <- "+proj=lcc +lat_1=49 +lat_2=77 +lat_0=0 +lon_0=-95 +x_0=0 +y_0=0 +ellps=GRS80 +units=m +no_defs"
+
+# Already tried: original data, all the following projections, transforming both points and rasters and shapefile. 
+# Nothing worked.
+studyAreaToCrop <- Cache(prepInputs, url = sim$url.studyArea,
+                         destinationPath = sim$tempPath.studyArea) %>%
+  selectSpecificAreas(specificAreas = sim$specificAreaToCropShapefile)
+
+# TRANSFORMING POINTS (wich appear to not have a projection) --> Still not aligning
+pointsDF <- data.frame(X = birdData$X, Y = birdData$Y)
+coordinates(pointsDF) <- ~X+Y
+projection(pointsDF) <- "+init:epsg=4326"
+pointsTrans <- spTransform(pointsDF, CRS(projection(sim$vegMap)))
+
+# TRYING SHAPEFILE SENT BY DIANA --> It's not the original projection from the points 
+require(rgdal)
+newSHPPath <- "/home/tmichele/Documents/GitHub/birdsBECzonesBC/modules/prepingInputs/data/province_state_lcc.shp"
+newSHP <- readOGR(newSHPPath)
+naStates <- subset(newSHP, is.na(STATE))
+
+studyAreaToCrop <- sp::spTransform(studyAreaToCrop, CRSobj = LambertsConformalConic)
+studyAreaToCropSHP <- sp::spTransform(naStates, CRSobj = epsg4267) #and also tested all other projections...
+
+plot(studyAreaToCrop) #or nStates
+plot(points, add= TRUE , col = 'red', pch = 19, cex = 0.5) #or pointsTrans with vegMap plot
+
+# ============= ALL FAILED SO FAR ======================
 
     xmin <- raster::extent(studyAreaToCrop)[1]
     xmax <- raster::extent(studyAreaToCrop)[2]
     ymin <- raster::extent(studyAreaToCrop)[3]
     ymax <- raster::extent(studyAreaToCrop)[4]
-    
-    browser()
-    
+  
   birdData2 <- birdData[birdData$X>xmin & birdData$X<xmax &
                    birdData$Y>ymin & birdData$Y<ymax,] # THERE ARE POINTS (Nicole's map showed it!), I JUST DONT KNOW WHY THESE ARE NOT BEING SELECTED...
     
