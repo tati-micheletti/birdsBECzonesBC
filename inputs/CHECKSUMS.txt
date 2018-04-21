@@ -1,0 +1,2 @@
+"file" "checksum" "filesize" "algorithm"
+"studyArea.shp" "0e0abf0756581648" "3235388" "xxhash64"

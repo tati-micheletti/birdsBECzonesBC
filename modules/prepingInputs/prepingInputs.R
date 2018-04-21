@@ -14,7 +14,7 @@ defineModule(sim, list(
   timeunit = "year",
   citation = list("citation.bib"),
   documentation = list("README.txt", "prepingInputs.Rmd"),
-  reqdPkgs = list("sf", "dplyr", "RColorBrewer", "raster", "sp", "reproducible", "data.table","rgdal"),
+  reqdPkgs = list("sf", "dplyr", "RColorBrewer", "raster", "sp", "reproducible", "data.table","rgdal", "gdalUtils"),
   parameters = rbind(
        defineParameter(".useCache", "logical", FALSE, NA, NA, "Should this entire module be run with caching activated? This is generally intended for data-type modules, where stochasticity and time are not relevant"),
        defineParameter("useWholeCountry", "logical", FALSE, NA, NA, "Should this module be run on the whole country?")
@@ -88,7 +88,7 @@ doEvent.prepingInputs = function(sim, eventTime, eventType) {
        Plot(sim$vegMap, title = "Vegetation Map") # Take out after running !! -------------------------------
       
        if(!file.exists(file.path(inputPath(sim), "can_age04_1km.tif"))){
-       sim$ageMap <- Cache(prepInputs, url = sim$url.ageMap,
+       sim$ageMap <- prepInputs(url = sim$url.ageMap,
                            targetFile = asPath(file.path(inputPath(sim), "can_age04_1km.tif")),
                            destinationPath = asPath(file.path(inputPath(sim))),
                            rasterToMatch = sim$vegMap)
@@ -96,10 +96,13 @@ doEvent.prepingInputs = function(sim, eventTime, eventType) {
        } else {
       
       sim$ageMap <- raster::raster(file.path(inputPath(sim), "can_age04_1km.tif")) #%>%
-#        postProcess(rasterToMatch = sim$vegMap) ==> If this works, I can take out from lines 103 - 116.
+#        postProcess(rasterToMatch = sim$vegMap) ==> If this works, I can take out from lines 103 - 116. Maybe put it in the same projection before crop/mask!
+      
+      browser()
       
       cutlinePath <- file.path(inputPath(sim), "studyArea.shp")
       
+# *** NOTE ***      # In my computer, this is not saving the cropped raster... Maybe memory/processing problems?
       gdalUtils::gdalwarp(srcfile = file.path(inputPath(sim), "can_age04_1km.tif"), # Raster file path
                dstfile = file.path(inputPath(sim), "can_age04_1km_cropped.tif"), # Cropped raster file name
                overwrite = TRUE, # If you alreday have a raster with the same name and want to overwrite it
