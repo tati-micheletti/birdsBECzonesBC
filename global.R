@@ -37,7 +37,7 @@ objects <- list(url.ageMap = "https://drive.google.com/open?id=1lwszwnFjZ3DQ3BBQ
 
 ## Simulation setup
 mySim <- simInit(times = times, params = parameters, modules = modules, paths =  paths, objects = objects)
-system.time(mySimOut <- spades(mySim, debug = TRUE))
+system.time(mySimOut <- spades(mySim, debug = TRUE)) #  Error: file.exists(checksumFile) is not TRUE ==> It stops on preparing ageMap.
 
 # Visualizing outputs
 for (i in 2005:2010){
