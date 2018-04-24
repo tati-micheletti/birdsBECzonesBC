@@ -63,6 +63,9 @@ browser()
 points <- data.frame(X = birdData$X, Y = birdData$Y) %>%
   SpatialPoints()
 
+epsg32610 <- "+init=epsg:32610"  # NEED TO TRY THIS. THIS IS UTM. It is possible this is the projection, considering the data comes from GP
+epsg3857 <- "+init=epsg:3857"  # Google maps, etc...
+
 epsg4267 <- "+init=epsg:4267"
 epsg4326 <- "+init=epsg:4326"
 epsg4269 <- "+init=epsg:4269"
