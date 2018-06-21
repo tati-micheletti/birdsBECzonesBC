@@ -20,8 +20,7 @@ modules <- list("prepingInputs") #, "LccToBeaconsReclassify", "forestAge", "fore
 
 times <- list(start = 2005, end = 2005, timeunit = "year")
 parameters <- list(useWholeCountry = FALSE)
-objects <- list(url.ageMap = "https://drive.google.com/open?id=1lwszwnFjZ3DQ3BBQ7ikiAlN6FXyy2uNX",
-                url.vegMap = "ftp://ftp.ccrs.nrcan.gc.ca/ad/NLCCLandCover/LandcoverCanada2005_250m/LandCoverOfCanada2005_V1_4.zip",
+objects <- list(url.vegMap = "ftp://ftp.ccrs.nrcan.gc.ca/ad/NLCCLandCover/LandcoverCanada2005_250m/LandCoverOfCanada2005_V1_4.zip",
                 url.studyArea = paste0("http://www.bcstats.gov.bc.ca/Files/18885d4f-e4cf-443b-bb3b-d169651be62d",
                                         "/Boundaries-CensusDivisions2011.zip"),
                 tempPath.ageMap = file.path(tempdir(), "ageMap"),
